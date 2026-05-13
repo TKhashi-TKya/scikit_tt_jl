@@ -1,12 +1,14 @@
+using LinearAlgebra
+
 function header(title=nothing, subtitle=nothing)
     #=
     println scikit_tt_jl header.
 
     Parameters
     ----------
-    title : string
+    title :: String
         title or name of the procedure
-    subtitle : string
+    subtitle :: String
         subtitle of the procedure
     =#
 
@@ -35,15 +37,15 @@ function progress(str_text::String, percent::Float64, cpu_time::Float64=0.0, sho
 
     Parameters
     ----------
-    str_text : string
+    str_text :: String
         string to print
-    percent : float
+    percent :: Float64
         current progress; if percent=0, the current time is returned
-    cpu_time : float
+    cpu_time :: Float64
         current CPU time
-    show : bool, optional
+    show :: Bool, optional
         whether to print the progress, default is True
-    width : int
+    width :: Int
         width of the progress bar, default is 47
     =#
 
@@ -94,19 +96,77 @@ end
 
 
 mutable struct Timer
-    #=
-    Measure CPU time.
-
-    Can be executed using the 'with' statement in order to measure the CPU time needed for calculations.
-    =#
-    
     start_time::Float64
     elapsed::Float64
 end
 
-    def __enter__(self):
-        self.start_time = time.time()
-        return self
+function with_timer(f)
+    t = Timer(time(), 0.0)
 
-    def __exit__(self, exc_type, exc_value, traceback):
-        self.elapsed = time.time() - self.start_time
+    try
+        return f(t)
+    finally
+        t.elapsed = time() - t.start_time
+    end
+end
+
+
+function truncated_svd(matrix::Array, threshold::Float64=0.0, max_rank::Int=Inf, rel_truncation::Bool=True)
+    #=
+    Compute truncated SVD.
+
+    Parameters
+    ----------
+    matrix :: Array
+        matrix to be decomposed
+    threshold :: Float64, optional
+        threshold for truncated SVD, default is 0
+    max_rank :: Int
+        maximum rank of truncated SVD
+    rel_truncation :: Bool
+        truncate singular values relative to largest singular value. If False,
+        parameter threshold is used as absolute truncation threshold.
+        Only applies if threshold is non-zero.
+
+    Returns
+    -------
+    u :: Array
+        matrix of left singular vectors
+    s :: Array
+        vector of singular values
+    v :: Array
+        matrix of right singular vectors
+    =#
+
+    # try different Lapack driver if necessary
+    try
+        SVD = svd!(matrix; full::Bool=False, alg::Algorithm=DivideAndConquer())
+        u = SVD.U
+        s = SVD.S
+        v = SVD.Vt
+    catch
+        SVD = svd!(matrix; full::Bool=False, alg::Algorithm=QRIteration())
+        u = SVD.U
+        s = SVD.S
+        v = SVD.Vt
+    end
+
+    # rank reduction
+    if threshold != 0.0
+        if rel_truncation
+            indices = findall((s ./ s[0]) .> threshold)
+        else
+            indices = findall(s .> threshold)
+        end
+        u = u[:, indices]
+        s = s[indices]
+        v = v[indices, :]
+    end
+    if max_rank != Inf
+        u = u[:, 1:min(size(u, 2), max_rank)]
+        s = s[1:min(size(s, 1), max_rank)]
+        v = v[1:min(size(v, 1), max_rank), :]
+    end
+
+    return u, s, v
+end
