@@ -121,7 +121,7 @@ function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank:
 
     Parameters
     ----------
-    matrix :: Array
+    matrix :: AbstractMatrix
         matrix to be decomposed
     threshold :: Float64, optional
         threshold for truncated SVD, default is 0
@@ -134,11 +134,11 @@ function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank:
 
     Returns
     -------
-    u :: Array
+    u :: AbstractMatrix
         matrix of left singular vectors
-    s :: Array
+    s :: AbstractMatrix
         vector of singular values
-    v :: Array
+    v :: AbstractMatrix
         matrix of right singular vectors
     =#
 
