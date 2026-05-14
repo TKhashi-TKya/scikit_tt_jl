@@ -1,3 +1,7 @@
+module Utils
+
+export header, progress, with_timer, truncated_svd
+
 using LinearAlgebra
 
 function header(title=nothing, subtitle=nothing)
@@ -18,11 +22,11 @@ function header(title=nothing, subtitle=nothing)
     println(stdout, "| .__/  \\__,  |  |  \\  |   |      |   |        ")
     println(stdout, "o ─────────── o ────── o ─ o ──── o ─ o ── ─  ─")
 
-    if isnothing(title)
+    if !isnothing(title)
         println("|")
         println("o ─ " * title)
     end
-    if isnothing(subtitle)
+    if !isnothing(subtitle)
         println("    " * subtitle)
     end
     println(" ")
@@ -111,7 +115,7 @@ function with_timer(f)
 end
 
 
-function truncated_svd(matrix::Array, threshold::Float64=0.0, max_rank::Int=Inf, rel_truncation::Bool=True)
+function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank::Union{Int, Float64}=Inf, rel_truncation::Bool=true)
     #=
     Compute truncated SVD.
 
@@ -138,18 +142,10 @@ function truncated_svd(matrix::Array, threshold::Float64=0.0, max_rank::Int=Inf,
         matrix of right singular vectors
     =#
 
-    # try different Lapack driver if necessary
-    try
-        SVD = svd!(matrix; full::Bool=False, alg::Algorithm=DivideAndConquer())
-        u = SVD.U
-        s = SVD.S
-        v = SVD.Vt
-    catch
-        SVD = svd!(matrix; full::Bool=False, alg::Algorithm=QRIteration())
-        u = SVD.U
-        s = SVD.S
-        v = SVD.Vt
-    end
+    SVD = svd(matrix; full=false)
+    u = SVD.U
+    s = SVD.S
+    v = SVD.Vt
 
     # rank reduction
     if threshold != 0.0
@@ -169,4 +165,6 @@ function truncated_svd(matrix::Array, threshold::Float64=0.0, max_rank::Int=Inf,
     end
 
     return u, s, v
+end
+
 end
