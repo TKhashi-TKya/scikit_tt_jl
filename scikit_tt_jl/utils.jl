@@ -4,7 +4,7 @@ export header, progress, with_timer, truncated_svd
 
 using LinearAlgebra
 
-function header(title=nothing, subtitle=nothing)
+function header(title::String=nothing, subtitle::String=nothing)
     #=
     println scikit_tt_jl header.
 
@@ -33,7 +33,7 @@ function header(title=nothing, subtitle=nothing)
     println(" ")
 end
 
-function progress(str_text::String, percent::Float64, cpu_time::Float64=0.0, show::Bool=True, width::Int=47)
+function progress(str_text::String, percent::AbstractFloat, cpu_time::AbstractFloat=0.0, show::Bool=True, width::Integer=47)
     #=
     Show progress in percent.
 
@@ -43,13 +43,13 @@ function progress(str_text::String, percent::Float64, cpu_time::Float64=0.0, sho
     ----------
     str_text :: String
         string to print
-    percent :: Float64
+    percent :: AbstractFloat
         current progress; if percent=0, the current time is returned
-    cpu_time :: Float64
+    cpu_time :: AbstractFloat
         current CPU time
     show :: Bool, optional
         whether to print the progress, default is True
-    width :: Int
+    width :: Integer
         width of the progress bar, default is 47
     =#
 
@@ -100,8 +100,8 @@ end
 
 
 mutable struct Timer
-    start_time::Float64
-    elapsed::Float64
+    start_time::AbstractFloat
+    elapsed::AbstractFloat
 end
 
 function with_timer(f)
@@ -115,7 +115,7 @@ function with_timer(f)
 end
 
 
-function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank::Union{Int, typeof(Inf)}=Inf, rel_truncation::Bool=true)
+function truncated_svd(matrix::AbstractMatrix; threshold::AbstractFloat=0.0, max_rank::Union{Integer, typeof(Inf)}=Inf, rel_truncation::Bool=true)
     #=
     Compute truncated SVD.
 
@@ -123,9 +123,9 @@ function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank:
     ----------
     matrix :: AbstractMatrix
         matrix to be decomposed
-    threshold :: Float64, optional
+    threshold :: AbstractFloat, optional
         threshold for truncated SVD, default is 0
-    max_rank :: Int
+    max_rank :: Integer
         maximum rank of truncated SVD
     rel_truncation :: Bool
         truncate singular values relative to largest singular value. If False,
