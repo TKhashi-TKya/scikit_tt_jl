@@ -115,7 +115,7 @@ function with_timer(f)
 end
 
 
-function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank::Union{Int, Float64}=Inf, rel_truncation::Bool=true)
+function truncated_svd(matrix::AbstractMatrix; threshold::Float64=0.0, max_rank::Union{Int, typeof(Inf)}=Inf, rel_truncation::Bool=true)
     #=
     Compute truncated SVD.
 
