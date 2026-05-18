@@ -4,7 +4,7 @@ export header, progress, with_timer, truncated_svd
 
 using LinearAlgebra
 
-function header(title::String=nothing, subtitle::String=nothing)
+function header(title::Union{String, Nothing}=nothing, subtitle::Union{String, Nothing}=nothing)
     #=
     println scikit_tt_jl header.
 
@@ -115,7 +115,7 @@ function with_timer(f)
 end
 
 
-function truncated_svd(matrix::AbstractMatrix; threshold::AbstractFloat=0.0, max_rank::Union{Integer, typeof(Inf)}=Inf, rel_truncation::Bool=true)
+function truncated_svd(matrix::AbstractMatrix; threshold::AbstractFloat=0.0, max_rank::Union{Integer, Nothing}=nothing, rel_truncation::Bool=true)
     #=
     Compute truncated SVD.
 
@@ -150,7 +150,7 @@ function truncated_svd(matrix::AbstractMatrix; threshold::AbstractFloat=0.0, max
     # rank reduction
     if threshold != 0.0
         if rel_truncation
-            indices = findall((s ./ s[0]) .> threshold)
+            indices = findall((s ./ s[1]) .> threshold)
         else
             indices = findall(s .> threshold)
         end
@@ -158,7 +158,7 @@ function truncated_svd(matrix::AbstractMatrix; threshold::AbstractFloat=0.0, max
         s = s[indices]
         v = v[indices, :]
     end
-    if max_rank != Inf
+    if !isnothing(max_rank)
         u = u[:, 1:min(size(u, 2), max_rank)]
         s = s[1:min(size(s, 1), max_rank)]
         v = v[1:min(size(v, 1), max_rank), :]
